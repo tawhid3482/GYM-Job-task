@@ -23,7 +23,7 @@ Web Framework: Express.js
 
 ORM: Prisma
 
-Database: PostgreSQL / MongoDB
+Database: MongoDB
 
 Authentication: JWT (JSON Web Tokens)
 
@@ -39,7 +39,7 @@ Password Hashing: bcryptjs
 🔹 User
 Create User
 
-POST /api/users
+POST https://job-task-nu.vercel.app/api/v1/users/register
 
 {
 "name": "user islam",
@@ -49,7 +49,7 @@ POST /api/users
 
 Login User
 
-POST /api/auth/login
+POST https://job-task-nu.vercel.app/api/v1/auth/login
 
 {
 "email": "user@gmail.com",
@@ -59,7 +59,7 @@ POST /api/auth/login
 🔹 Trainer (Admin only)
 Create Trainer
 
-POST /api/trainers
+POST https://job-task-nu.vercel.app/api/v1/api/trainers
 
 {
 "userId": "68d661d9838aac62ecc114e2",
@@ -69,12 +69,12 @@ POST /api/trainers
 
 Get All Trainers
 
-GET /api/trainers
+GET https://job-task-nu.vercel.app/api/v1/trainers
 
 🔹 Class Schedules (Admin only)
 Create Class Schedule
 
-POST /api/classes
+POST https://job-task-nu.vercel.app/api/v1/schedules
 
 {
 "trainerId": "68d687d0cb8fced01f687be0",
@@ -85,12 +85,12 @@ POST /api/classes
 
 Get All Schedules
 
-GET /api/classes
+GET https://job-task-nu.vercel.app/api/v1/schedules
 
 🔹 Booking (Trainee only)
-Book a Class
+Book aschedules Class
 
-POST /api/bookings
+POST https://job-task-nu.vercel.app/api/v1/bookings
 
 {
 "classId": "68d68e7838439ca0aaafce10"
@@ -98,11 +98,11 @@ POST /api/bookings
 
 Cancel Booking
 
-PATCH /api/bookings/:bookingId/cancel
+PATCH https://job-task-nu.vercel.app/api/v1/bookings/cencel/:bookingId
 
 Get My Bookings
 
-GET /api/bookings/me
+GET https://job-task-nu.vercel.app/api/v1/bookings/my
 
 🗄️ Database Schema (Prisma Models – simplified)
 model User {
@@ -183,6 +183,5 @@ Start Server
 
 npm run dev
 
-🚀 Live Hosting Link
+🚀 Live Hosting Link : https://job-task-nu.vercel.app
 
-👉 Live API Server
