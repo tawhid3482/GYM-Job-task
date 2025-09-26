@@ -160,7 +160,7 @@ CANCELLED
 
 Clone Repository
 
-git clone https://github.com/yourusername/gym-management.git
+git clone https://github.com/tawhid3482/GYM-Job-task.git
 cd gym-management
 
 Install Dependencies
