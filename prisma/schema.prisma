@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id        String   @id @map("_id") @default(auto()) @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   password  String
   name      String?
@@ -16,12 +16,12 @@ model User {
   createdAt DateTime @default(now())
 
   // one-to-one relations (no fields/references here)
-  trainer   Trainer?
-  trainee   Trainee?
+  trainer Trainer?
+  trainee Trainee?
 }
 
 model Trainer {
-  id          String     @id @map("_id") @default(auto()) @db.ObjectId
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
   userId      String     @unique @db.ObjectId
   user        User       @relation(fields: [userId], references: [id])
   bio         String?
@@ -30,7 +30,7 @@ model Trainer {
 }
 
 model Trainee {
-  id       String    @id @map("_id") @default(auto()) @db.ObjectId
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
   userId   String    @unique @db.ObjectId
   user     User      @relation(fields: [userId], references: [id])
   phone    String?
@@ -38,8 +38,9 @@ model Trainee {
 }
 
 model Schedule {
-  id          String    @id @map("_id") @default(auto()) @db.ObjectId
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   date        DateTime
+  startTime   DateTime
   endTime     DateTime
   trainerId   String    @db.ObjectId
   trainer     Trainer   @relation(fields: [trainerId], references: [id])
@@ -49,11 +50,12 @@ model Schedule {
 }
 
 model Booking {
-  id         String   @id @map("_id") @default(auto()) @db.ObjectId
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
   scheduleId String   @db.ObjectId
   schedule   Schedule @relation(fields: [scheduleId], references: [id])
   traineeId  String   @db.ObjectId
   trainee    Trainee  @relation(fields: [traineeId], references: [id])
+  status     Status   @default(CONFIRMED)
   createdAt  DateTime @default(now())
 }
 
@@ -61,4 +63,8 @@ enum Role {
   ADMIN
   TRAINER
   TRAINEE
+}
+enum Status {
+  CONFIRMED
+  CANCELLED
 }
