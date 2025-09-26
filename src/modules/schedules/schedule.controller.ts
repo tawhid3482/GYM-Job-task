@@ -8,7 +8,8 @@ import AppError from "../../helpers/AppError";
 export const classController = {
   createClassSchedule: catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-      const schedule = await classServices.createClassSchedule(req.body);
+      const id = req.user!.id;
+      const schedule = await classServices.createClassSchedule(id, req.body);
 
       sendResponse(res, {
         statusCode: httpStatus.CREATED,

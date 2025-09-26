@@ -31,7 +31,6 @@ const createUser = async (data: {
   // hide password
   const { password, ...safeUser } = user;
   return safeUser;
-  return safeUser;
 };
 
 const getMe = async (userId: string) => {

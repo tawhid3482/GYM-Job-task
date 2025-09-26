@@ -8,5 +8,4 @@ export const createClassScheduleSchema = z.object({
   startTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Invalid start time format",
   }),
-  createdById: z.string().min(1, "createdById is required"),
 });
