@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleValidationError = void 0;
 const handleValidationError = (err) => {
     const errorSources = Object.values(err.errors).map((val) => ({
-        path: val.path,
+        field: val.path,
         message: val.message,
     }));
     return {

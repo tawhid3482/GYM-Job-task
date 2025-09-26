@@ -4,26 +4,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.auth = void 0;
-const AppError_1 = __importDefault(require("../helpers/AppError"));
+const jsonwebtoken_1 = require("jsonwebtoken");
 const env_1 = require("../config/env");
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const auth = (roles) => {
+const AppError_1 = __importDefault(require("../helpers/AppError"));
+const auth = (...roles) => {
     return (req, res, next) => {
+        const token = req.headers.authorization; // শুধু token নেওয়া
+        if (!token)
+            return next(new AppError_1.default(401, "Unauthorized access", "No token provided"));
         try {
-            // authorization header safe check
-            const authHeader = req.headers["authorization"] || req.headers["Authorization"];
-            const token = authHeader === null || authHeader === void 0 ? void 0 : authHeader.toString().split(" ")[1];
-            if (!token)
-                throw new AppError_1.default(401, "Unauthorized");
-            const decoded = jsonwebtoken_1.default.verify(token, env_1.envVars.JWT_ACCESS_SECRET);
+            const decoded = (0, jsonwebtoken_1.verify)(token, env_1.envVars.JWT_ACCESS_SECRET);
             if (!roles.includes(decoded.role)) {
-                throw new AppError_1.default(403, "Forbidden");
+                return next(new AppError_1.default(403, "Forbidden", "You are not allowed"));
             }
-            req.user = decoded; // TypeScript now recognizes this
+            req.user = decoded; // TypeScript জানবে id আছে
             next();
         }
         catch (err) {
-            next(err);
+            return next(new AppError_1.default(401, "Unauthorized access", "Invalid token"));
         }
     };
 };

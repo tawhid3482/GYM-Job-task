@@ -1,5 +1,6 @@
 export default class AppError extends Error {
     statusCode: number;
-    constructor(statusCode: number, message: string, stack?: string);
+    errorDetails?: any;
+    constructor(statusCode: number, message: string, errorDetails?: any, stack?: string);
 }
 //# sourceMappingURL=AppError.d.ts.map
