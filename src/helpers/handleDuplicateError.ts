@@ -8,7 +8,7 @@ export const handleDuplicateError = (err: any) => {
     statusCode: 400,
     message,
     errorSources: keys.map((key) => ({
-      path: key,
+      field: key,
       message: `${key} is already in use.`,
     })) as TErrorSources,
   };

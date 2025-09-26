@@ -6,7 +6,7 @@ export const handleCastError = (err: any) => {
     message: "Invalid ID format",
     errorSources: [
       {
-        path: err.path,
+        field: err.path,
         message: `Invalid value for ${err.path}`,
       },
     ] as TErrorSources,
