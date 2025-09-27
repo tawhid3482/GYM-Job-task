@@ -67,7 +67,7 @@ export const bookingServices = {
       },
     });
 
-    return { ...fullBooking, trainee }; // trainee object already safe
+    return { ...fullBooking, trainee }; 
   },
 
   cancelBooking: async (bookingId: string, traineeId: string) => {

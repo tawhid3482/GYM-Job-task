@@ -12,7 +12,7 @@ interface CustomJwtPayload extends JwtPayload {
 
 export const auth = (...roles: Role[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization; // শুধু token নেওয়া
+    const token = req.headers.authorization; 
 
     if (!token) return next(new AppError(401, "Unauthorized access", "No token provided"));
 
@@ -23,7 +23,7 @@ export const auth = (...roles: Role[]) => {
         return next(new AppError(403, "Forbidden", "You are not allowed"));
       }
 
-      req.user = decoded; // TypeScript জানবে id আছে
+      req.user = decoded; 
       next();
     } catch (err) {
       return next(new AppError(401, "Unauthorized access", "Invalid token"));

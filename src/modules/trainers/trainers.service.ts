@@ -20,15 +20,15 @@ export const trainerServices = {
     const trainer = await prisma.trainer.create({
       data: {
         userId: data.userId,
-        bio: data.bio ?? null, // যদি undefined আসে, null হয়ে যাবে
+        bio: data.bio ?? null, 
         specialties: data.specialties,
       },
     });
 
-    // update user role -> TRAINER
+   
     await prisma.user.update({
       where: { id: data.userId },
-      data: { role: "TRAINER" }, // Role enum ধরেই TRAINER হবে
+      data: { role: "TRAINER" }, 
     });
 
     return trainer;

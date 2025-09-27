@@ -20,7 +20,6 @@ router.patch(
   bookingController.cancelBooking
 );
 
-// Trainee get my bookings
 router.get("/my", auth("TRAINEE"), bookingController.getMyBookings);
 
 export const BookingsRoutes = router;

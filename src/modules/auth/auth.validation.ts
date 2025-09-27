@@ -1,6 +1,6 @@
 import z from "zod";
 
 export const loginUserSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: z.string(),
   password: z.string().min(6),
 });
