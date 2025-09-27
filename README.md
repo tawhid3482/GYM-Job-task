@@ -13,7 +13,10 @@ This system enforces strict business rules with role-based access using JWT auth
 
 🗂️ Relational Diagram
 
-(Replace with your actual diagram image or link)
+link ER Diagram: https://lucid.app/lucidchart/79f4e076-3fab-4734-b02d-ac9145a24f66/edit?viewport_loc=-383%2C-525%2C2158%2C894%2C0_0&invitationId=inv_14025b9b-2600-468c-960b-ae16692b7d9c
+
+If the ER diagram link is not working then
+Link Image : https://ibb.co.com/GQcYJWCW
 
 🛠️ Technology Stack
 
