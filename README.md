@@ -1,194 +1,110 @@
-🏋️ Gym Class Scheduling and Membership Management System
-📌 Project Overview
+import { Router } from "express";
+import multer from "multer";
+import { auth } from "../middlewares/auth";
+import { validateRequest } from "../middlewares/validateRequest";
+import { createClassScheduleSchema } from "../validation/class.validation";
+import { classController } from "../controllers/class.controller";
 
-The Gym Class Scheduling and Membership Management System is designed to streamline gym operations with three distinct roles: Admin, Trainer, and Trainee.
+const router = Router();
 
-Admin: Creates trainers, manages schedules (max 5 per day), and assigns trainers.
+// 🔹 memory storage for files
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-Trainer: Can only view assigned schedules.
+// 🔹 user single or multiple image পাঠাতে পারবে
+router.post(
+  "/",
+  auth("ADMIN"),
+  upload.any(), // accepts both single & multiple
+  validateRequest(createClassScheduleSchema),
+  classController.createClassSchedule
+);
 
-Trainee: Manages own profile, books/cancels class schedules (max 10 trainees per class, no overlapping bookings).
+export default router;
 
-This system enforces strict business rules with role-based access using JWT authentication and Prisma ORM.
+import { Request, Response, NextFunction } from "express";
+import httpStatus from "http-status";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import { classServices } from "../services/class.service";
+import { uploadMultipleToFTP } from "../../utils/uploadToFTP";
 
-🗂️ Relational Diagram
+export const classController = {
+  createClassSchedule: catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const userId = req.user!.id;
 
-link ER Diagram: https://lucid.app/lucidchart/79f4e076-3fab-4734-b02d-ac9145a24f66/edit?viewport_loc=-383%2C-525%2C2158%2C894%2C0_0&invitationId=inv_14025b9b-2600-468c-960b-ae16692b7d9c
+      // 🔹 File Uploads
+      let uploadedUrls: string[] = [];
+      const files = req.files as Express.Multer.File[];
 
-If the ER diagram link is not working then
-Link Image : https://ibb.co.com/GQcYJWCW
+      if (files && files.length > 0) {
+        uploadedUrls = await uploadMultipleToFTP(files);
+      }
 
-🛠️ Technology Stack
+      // 🔹 merge body data + images
+      const scheduleData = {
+        ...req.body,
+        images: uploadedUrls, // array of URLs
+        createdBy: userId,
+      };
 
-Programming Language: TypeScript
+      const schedule = await classServices.createClassSchedule(userId, scheduleData);
 
-Web Framework: Express.js
+      sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: "Class schedule created successfully",
+        data: schedule,
+      });
+    }
+  ),
+};
 
-ORM: Prisma
 
-Database: MongoDB
+import * as ftp from "basic-ftp";
+import path from "path";
+import { Readable } from "stream";
+import { envVars } from "../config/env";
 
-Authentication: JWT (JSON Web Tokens)
+/**
+ * 🔹 Upload single file to FTP
+ */
+export const uploadToFTP = async (file: Express.Multer.File): Promise<string> => {
+  const client = new ftp.Client();
+  client.ftp.verbose = false;
 
-Password Hashing: bcryptjs
+  try {
+    await client.access({
+      host: envVars.CPANEL_HOST,
+      user: envVars.CPANEL_USER,
+      password: envVars.CPANEL_PASS,
+      secure: false,
+    });
 
-🔑 Admin Credentials (for testing)
-{
-"email": "admin@gmail.com",
-"password": "123456"
-}
+    const remoteFileName = `${Date.now()}_${file.originalname}`;
+    const remotePath = path.posix.join(envVars.CPANEL_UPLOAD_PATH, remoteFileName);
 
-📌 API Endpoints
-🔹 User
-Create User
+    const stream = Readable.from(file.buffer);
+    await client.uploadFrom(stream, remotePath);
 
-POST https://job-task-nu.vercel.app/api/v1/users/register
+    return `https://${envVars.CPANEL_DOMAIN}/images/${remoteFileName}`;
+  } catch (err) {
+    console.error("FTP Upload Error:", err);
+    throw new Error("Image upload failed");
+  } finally {
+    client.close();
+  }
+};
 
-{
-"name": "user islam",
-"email": "user@gmail.com",
-"password": "123456"
-}
-
-Login User
-
-POST https://job-task-nu.vercel.app/api/v1/auth/login
-
-{
-"email": "user@gmail.com",
-"password": "123456"
-}
-
-get me 
-
-GET https://job-task-nu.vercel.app/api/v1/users/me
-
-🔹 Trainer (Admin only)
-Create Trainer
-
-POST https://job-task-nu.vercel.app/api/v1/api/trainers
-
-{
-"userId": "68d661d9838aac62ecc114e2",
-"bio": "swimer",
-"specialties": ["swim", "train"]
-}
-
-Get All Trainers
-
-GET https://job-task-nu.vercel.app/api/v1/trainers
-
-🔹 Class Schedules (Admin only)
-Create Class Schedule
-
-POST https://job-task-nu.vercel.app/api/v1/schedules
-
-{
-"trainerId": "68d687d0cb8fced01f687be0",
-"date": "2025-09-26",
-"startTime": "2025-09-26T12:00:00.000Z",
-"createdById": "68d68cdebc8f6142a25f18b3"
-}
-
-Get All Schedules
-
-GET https://job-task-nu.vercel.app/api/v1/schedules
-
-🔹 Booking (Trainee only)
-Book aschedules Class
-
-POST https://job-task-nu.vercel.app/api/v1/bookings
-
-{
-"classId": "68d68e7838439ca0aaafce10"
-}
-
-Cancel Booking
-
-PATCH https://job-task-nu.vercel.app/api/v1/bookings/cencel/:bookingId
-
-Get My Bookings
-
-GET https://job-task-nu.vercel.app/api/v1/bookings/my
-
-🗄️ Database Schema (Prisma Models – simplified)
-model User {
-id String @id @default(auto()) @map("\_id") @db.ObjectId
-name String
-email String @unique
-password String
-role Role @default(TRAINEE)
-trainer Trainer?
-bookings Booking[]
-}
-
-model Trainer {
-id String @id @default(auto()) @map("\_id") @db.ObjectId
-userId String @unique
-bio String?
-specialties String[]
-user User @relation(fields: [userId], references: [id])
-schedules Schedule[]
-}
-
-model Schedule {
-id String @id @default(auto()) @map("\_id") @db.ObjectId
-trainerId String
-createdById String
-date DateTime
-startTime DateTime
-endTime DateTime
-capacity Int @default(10)
-trainer Trainer @relation(fields: [trainerId], references: [id])
-bookings Booking[]
-}
-
-model Booking {
-id String @id @default(auto()) @map("\_id") @db.ObjectId
-scheduleId String
-traineeId String
-status Status @default(CONFIRMED)
-schedule Schedule @relation(fields: [scheduleId], references: [id])
-trainee User @relation(fields: [traineeId], references: [id])
-}
-
-enum Role {
-ADMIN
-TRAINER
-TRAINEE
-}
-
-enum Status {
-CONFIRMED
-CANCELLED
-}
-
-⚙️ Instructions to Run Locally
-
-Clone Repository
-
-git clone https://github.com/tawhid3482/GYM-Job-task.git
-cd gym-management
-
-Install Dependencies
-
-npm install
-
-Setup Environment Variables
-Create .env file:
-
-DATABASE_URL="mongodb+srv://..."
-JWT_SECRET="your-secret-key"
-BCRYPT_SALT_ROUND=10
-
-Run Prisma Migration
-
-npx prisma generate
-npx prisma db push
-
-Start Server
-
-npm run dev
-
-🚀 Live Hosting Link : https://job-task-nu.vercel.app
-
+/**
+ * 🔹 Upload multiple files to FTP
+ */
+export const uploadMultipleToFTP = async (files: Express.Multer.File[]): Promise<string[]> => {
+  const urls: string[] = [];
+  for (const file of files) {
+    const url = await uploadToFTP(file);
+    urls.push(url);
+  }
+  return urls;
+};
